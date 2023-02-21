@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Game Example</title>
+  <style>
+    #game-board {
+      width: 400px;
+      height: 400px;
+      border: 1px solid black;
+      position: relative;
+    }
+    .character {
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: blue;
+      border-radius: 50%;
+    }
+    .fruit {
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      background-color: red;
+      border-radius: 50%;
+    }
+    #score {
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-board">
+    <div id="score">0</div>
+  </div>
+  <script>
+    let score = 0;
+    let gameBoard = document.getElementById('game-board');
+    let character = document.createElement('div');
+    character.classList.add('character');
+    gameBoard.appendChild(character);
+
+    function createFruit() {
+      let fruit = document.createElement('div');
+      fruit.classList.add('fruit');
+      fruit.style.left = Math.random() * (gameBoard.offsetWidth - fruit.offsetWidth) + 'px';
+      fruit.style.top = Math.random() * (gameBoard.offsetHeight - fruit.offsetHeight) + 'px';
+      gameBoard.appendChild(fruit);
+    }
+
+    function eatFruit(fruit) {
+      fruit.remove();
+      score++;
+      document.getElementById('score').innerText = score;
+    }
+
+    gameBoard.addEventListener('click', function(event) {
+      if (event.target.classList.contains('fruit')) {
+        eatFruit(event.target);
+      }
+    });
+
+    setInterval(function() {
+      createFruit();
+    }, 1000);
+
+    setInterval(function() {
+      let x = Math.random() * (gameBoard.offsetWidth - character.offsetWidth);
+      let y = Math.random() * (gameBoard.offsetHeight - character.offsetHeight);
+      character.style.left = x + 'px';
+      character.style.top = y + 'px';
+    }, 1000);
+  </script>
+</body>
+</html>

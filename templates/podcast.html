@@ -1,0 +1,44 @@
+<head>
+    <meta charset="UTF-8">
+    <title>PodCast</title>
+</head>
+{% extends 'base.html' %}
+{% block content %}
+<body class="p-3 mb-2 bg-dark text-white">
+    <div class="container">
+        <div class = "hide-scroll" style="height: 100%">
+            <table class="table table-dark table-striped" style = "width: 100%; height: 100%" id="podcasttable">
+                <thead>
+                    <tr>
+                        <th class="col-1">팟캐스트 순위</th>
+                        <th class="col-3">팟캐스트 제목</th>
+                        <th class="col-1">팟캐스트 평점</th>
+                        <th class="col-7">팟캐스트 줄거리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for i in podcastlist %}
+                <tr>
+                    <td>{{ i[0] }}</td>
+                    <td>{{ i[1] }}</td>
+                    <td>{{ i[2] }}</td>
+                    <td>{{ i[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#podcasttable').DataTable({
+                searching: true,
+                lengthChange: false,
+                lengthMenu: [100]
+            });
+        });
+    </script>
+</body>
+{% endblock %}
