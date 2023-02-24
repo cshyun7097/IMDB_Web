@@ -1,5 +1,10 @@
 from flask import Flask, render_template, Response, request, redirect
 import pymysql
+import cv2, pafy, youtube_dl
+
+# url = "https://youtu.be/a7xVr5FK9nE"
+# video = pafy.new(url)
+# best = video.getbest(preftype="mp4")
 
 conn = pymysql.connect(host = '127.0.0.1', user = 'root', password = '1234', db = 'imdb', charset='utf8')
 cur = conn.cursor()
@@ -17,7 +22,7 @@ musicvideolist = cur.fetchall()
 app = Flask(__name__)
 
 @app.route('/')
-def hello_world():
+def index():
     return render_template('index.html')
 
 @app.route('/movie')

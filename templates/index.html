@@ -1,14 +1,43 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <style>
+        .board {
+            display: inline-block;
+            border-collapse: collapse;
+            margin: 10px;
+        }
+
+        .board td {
+            width: 20px;
+            height: 20px;
+            border: 1px solid black;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .board td.revealed {
+            background-color: black;
+            cursor: default;
+        }
+
+        .board td.mine {
+            background-color: red;
+        }
+
+        .board td.flag {
+            background-color: yellow;
+        }
+    </style>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/js/bootstrap.min.js">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
-</head>
-<body class="p-3 mb-2 bg-dark text-white">
     <div class="container-fluid">
         <div>
             <div class="row">
@@ -17,17 +46,131 @@
                         <td class="col-2"><button type="button" class="btn btn-secondary" style="width: 100%" onclick="location.href='movie'">Movie</button></td>
                         <td class="col-2"><button type="button" class="btn btn-secondary" style="width: 100%" onclick="location.href='tvshow'">TVShow</button></td>
                         <td class="col-2"><button type="button" class="btn btn-secondary" style="width: 100%" onclick="location.href='game'">Game</button></td>
-                        <td class="col-3"><button type="button" class="btn btn-secondary" style="width: 100%" onclick="location.href='musicvideo'">MusicVideo</button></td>
-                        <td class="col-3"><button type="button" class="btn btn-secondary" style="width: 100%" onclick="location.href='podcast'">PodCast</button></td>
+                        <td class="col-2"><button type="button" class="btn btn-secondary" style="width: 100%" onclick="location.href='musicvideo'">MusicVideo</button></td>
+                        <td class="col-2"><button type="button" class="btn btn-secondary" style="width: 100%" onclick="location.href='podcast'">PodCast</button></td>
                     </tr>
                 </table>
             </div>
         </div>
     </div>
+    <title>HOME</title>
+</head>
+<body class="p-3 mb-2 bg-dark text-white">
+    <div class="row">
+        <h1>지뢰찾기 게임</h1>
+        <table class="board"></table>
+        <script>
+            // 게임 보드 크기와 지뢰 개수 설정
+            const numRows = 50;
+            const numCols = 50;
+            const numMines = 150;
+
+            // 게임 보드 생성
+            const board = [];
+            for (let i = 0; i < numRows; i++) {
+                board[i] = [];
+                for (let j = 0; j < numCols; j++) {
+                    board[i][j] = {
+                        mine: false,
+                        revealed: false,
+                        flagged: false,
+                        neighbors: 0
+                    };
+                }
+            }
+
+            // 지뢰 랜덤 배치
+            let minesPlaced = 0;
+            while (minesPlaced < numMines) {
+                const row = Math.floor(Math.random() * numRows);
+                const col = Math.floor(Math.random() * numCols);
+                if (!board[row][col].mine) {
+                    board[row][col].mine = true;
+                    minesPlaced++;
+                }
+            }
+
+            // 보드 출력
+            const table = document.querySelector('.board');
+            for (let i = 0; i < numRows; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < numCols; j++) {
+                    const cell = document.createElement('td');
+                    cell.addEventListener('click', () => reveal(i, j));
+                    cell.addEventListener('contextmenu', event => {
+                        event.preventDefault();
+                        flag(i, j);
+                    });
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+
+            // 주변 지뢰 개수 계산
+            for (let i = 0; i < numRows; i++) {
+                for (let j = 0; j < numCols; j++) {
+                    if (!board[i][j].mine) {
+                        let count = 0;
+                        for (let row = i - 1; row <= i + 1; row++) {
+                            for (let col = j - 1; col <= j + 1; col++) {
+                                if (row >= 0 && row < numRows && col >= 0 && col < numCols && board[row][col].mine) {
+                                    count++;
+                                }
+                            }
+                        }
+                        board[i][j].neighbors = count;
+                    }
+                }
+            }
+                function reveal(row, col) {
+                if (board[row][col].revealed || board[row][col].flagged) {
+                    return;
+                }
+
+                const cell = table.rows[row].cells[col];
+                cell.classList.add('revealed');
+                board[row][col].revealed = true;
+
+                if (board[row][col].mine) {
+                    cell.classList.add('mine');
+                    alert('지뢰를 밟았습니다! 게임 오버!');
+                    return;
+                }
+
+                if (board[row][col].neighbors > 0) {
+                    cell.textContent = board[row][col].neighbors;
+                    return;
+                }
+
+                for (let i = row - 1; i <= row + 1; i++) {
+                    for (let j = col - 1; j <= col + 1; j++) {
+                        if (i >= 0 && i < numRows && j >= 0 && j < numCols) {
+                            reveal(i, j);
+                        }
+                    }
+                }
+            }
+
+            // 깃발 꽂기 함수
+            function flag(row, col) {
+                if (board[row][col].revealed) {
+                    return;
+                }
+
+                const cell = table.rows[row].cells[col];
+                if (board[row][col].flagged) {
+                    cell.classList.remove('flag');
+                    board[row][col].flagged = false;
+                } else {
+                    cell.classList.add('flag');
+                    board[row][col].flagged = true;
+                }
+            }
+        </script>
+    </div>
 </body>
 <footer>
     <div class="row">
-        <div class="col-1">Scraping By.PAD</div>
         <div class="col-1" style="height:50%">
             From.
             <a href="https://www.imdb.com/?ref_=nv_home"><img src="static\imdb_logo.png"></a>
